@@ -8,6 +8,7 @@ Public columnaCostoMdo As String
 Public MATRIZ_FACTORES(1 To 65, 1 To 4) As Variant
 Public parametros(1 To 10) As Variant
 Public AMBIENTE As String
+Public Const vbObjectError = -2147221504 ' Constante base para errores definidos por el usuario
 Sub InicializarVariablesGlobales()
     columnaNombreMaterial = "D"
     columnaCostoMaterial = "E"
@@ -15,11 +16,30 @@ Sub InicializarVariablesGlobales()
     columnaCostoServicio = "H"
     columnaNombreMdo = "J"
     columnaCostoMdo = "K"
-    
+   
     AMBIENTE = "PRODUCCION"
     'AMBIENTE = "DESARROLLO"
 
        
+End Sub
+Sub GenerarErrorMedidaNoEncontrada(modulo As String, subrutina As String)
+    'Const vbObjectError = -2147221504 ' Constante base para errores definidos por el usuario
+
+    Dim numeroError As Long
+    Dim origenError As String
+    Dim descripcionError As String
+
+    ' Define los detalles de tu error personalizado
+    numeroError = vbObjectError + 1001 ' Usa una base y añade un número único
+    origenError = modulo & "." & subrutina ' Especifica el origen del error
+    descripcionError = "En MATRIZ_FACTORES no se encuentra la medida de origen, de destino o ninguna de las dos."
+
+    ' Genera el error
+    Err.Raise numeroError, origenError, descripcionError
+End Sub
+Sub prueba()
+  GenerarErrorMedidaNoEncontrada "Principal", "prueba"
+
 End Sub
 'Recorre la matriz de factores y retorna el factor necesario para hacer el calculo
 Function ObtenerFactor(tipoDeMedida As String, medidaOrigen As String, medidaDestino As String) As Variant
@@ -44,6 +64,11 @@ Function ObtenerFactor(tipoDeMedida As String, medidaOrigen As String, medidaDes
                 Exit For
             End If
         Next fila
+        
+    If IsEmpty(factor) Then
+        GenerarErrorMedidaNoEncontrada "Principal", "ObtenerFactor"
+        Exit Function
+    End If
     If factor = 0 And factor <> "" Then
         Err.Raise 11, "CostosUnitarios", "División por cero"
     End If
@@ -372,8 +397,8 @@ Sub InicializarFactoresDeConversion()
     'PORCENTAJE
 
     MATRIZ_FACTORES(46, 1) = "porcentaje"
-    MATRIZ_FACTORES(46, 2) = "porcentaje"
-    MATRIZ_FACTORES(46, 3) = "porcentaje"
+    MATRIZ_FACTORES(46, 2) = "%"
+    MATRIZ_FACTORES(46, 3) = "%"
     MATRIZ_FACTORES(46, 4) = 1
     
     '------ INICIO MEDIDAS DE PESO ------
@@ -1216,7 +1241,80 @@ ManejarError:
     On Error GoTo 0
     
 End Sub
+'tipoDeCosto=["SERVICIOS","MATERIALES,"MANO_DE_OBRA"]
+'elemento= es el nombre del material, el servicio o la mano de obra
+Public Sub GuardarDatosMaestros(tipoDeCosto As String, nombreElemento As String, tipoDeMedida As String, _
+                                medidaDeCosto As String, precio As Variant, medidaDeUso As String, _
+                                cantidadDeUso As Variant, cantidadUnidadesCompradas As Variant)
+    Dim tabla As ListObject
+    Dim tablaMaestra As String
+    Dim nombreColumnaElemento As String
+    Dim columnaElemento As Range
+    
+    
+    parametros(1) = tipoDeCosto
+    parametros(2) = nombreElemento
+    parametros(3) = tipoDeMedida
+    parametros(4) = medidaDeCosto
+    parametros(5) = precio
+    parametros(6) = medidaDeUso
+    parametros(7) = cantidadDeUso
+    parametros(8) = cantidadUnidadesCompradas
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
+    
+    
+    If tipoDeCosto = "SERVICIOS" Then
+        tablaMaestra = "MaestroServicios"
+        nombreColumnaElemento = "SERVICIO"
+    ElseIf tipoDeCosto = "MATERIALES" Then
+        tablaMaestra = "MaestroMateriales"
+        nombreColumnaElemento = "MATERIAL"
+    ElseIf tipoDeCosto = "MANO_DE_OBRA" Then
+        tablaMaestra = "MaestroManoDeObra"
+        nombreColumnaElemento = "MANO DE OBRA"
+    End If
 
+    Set tabla = ThisWorkbook.Sheets(tipoDeCosto).ListObjects(tablaMaestra)
+    
+    'Obtener la fila donde está el elemento
+    
+    ' Encuentra la columna por nombre
+    Set columnaElemento = tabla.HeaderRowRange.Find(nombreColumnaElemento, LookIn:=xlValues, LookAt:=xlWhole)
+
+    ' Verifica si se encontraron las columnas
+    If columnaElemento Is Nothing Then
+        MsgBox "No se encontró la columna " & nombreColumnaElemento & ".", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Aplica el filtro
+    tabla.Range.AutoFilter Field:=columnaElemento.Column, Criteria1:=UCase(nombreElemento)
+     
+    ' Recorrer la fila visible después del filtro y graba datos maestros
+    If Not tabla.DataBodyRange.SpecialCells(xlCellTypeVisible) Is Nothing Then
+        For Each fila In tabla.DataBodyRange.SpecialCells(xlCellTypeVisible).Rows
+            fila.Cells(1, 2).Value = tipoDeMedida
+            fila.Cells(1, 3).Value = medidaDeCosto
+            fila.Cells(1, 4).Value = cantidadUnidadesCompradas
+            fila.Cells(1, 5).Value = medidaDeUso
+            fila.Cells(1, 6).Value = cantidadDeUso
+            fila.Cells(1, 7).Value = precio
+        Next fila
+    End If
+      
+    
+    Exit Sub
+    
+ManejarError:
+    ManejadorError "GuardarDatosMaestros", parametros
+
+
+End Sub
 Public Function costoUnitario(tipoDeMedida As String, medidaDeCosto As String, precio As Variant, medidaDeUso As String, cantidadDeUso As Variant, cantidadUnidadesCompradas As Variant) As Variant
     
     Dim costoPorUnidadDeCompra As Variant
@@ -1236,8 +1334,12 @@ Public Function costoUnitario(tipoDeMedida As String, medidaDeCosto As String, p
 
 
     tipoDeMedida = ExtraerTextoAntesDelEspacio(tipoDeMedida)
-    ' Llevar medida de costo (Unidad de Costo) a UNO Ej: 8.5$ por 9 metros, a cuanto el metro, a 0,94)
+    ' Llevar medida de costo (Unidad de Costo) a UNO Ej: 8.5$ por 9 metros, a cuanto el metro, a 0.94)
     
+    If tipoDeMedida = "PORCENTAJE" Then
+        cantidadUnidadesCompradas = 1
+    End If
+        
     costoPorUnidadDeCompra = precio / cantidadUnidadesCompradas
     
     ' Buscar factor de conversion entre unidad de uso y unidad de compra
@@ -1246,6 +1348,10 @@ Public Function costoUnitario(tipoDeMedida As String, medidaDeCosto As String, p
     factor = ObtenerFactor(tipoDeMedida, medidaDeUso, medidaDeCosto)
     
     ' Retorna el cálculo
+    If tipoDeMedida = "PORCENTAJE" Then
+        cantidadDeUso = cantidadDeUso / 100
+    End If
+    
     costoUnitario = Round(cantidadDeUso * costoPorUnidadDeCompra * factor, 3)
 
     Exit Function
@@ -1559,15 +1665,18 @@ Sub ManejadorError(subrutina As String, Optional parametros As Variant = Nothing
         For i = LBound(parametros) To UBound(parametros)
             strParametros = strParametros & "-" & parametros(i)
         Next i
+        Debug.Print "MENSAJE DE ERROR: '" & mensajeError & "'; LISTA DE PARAMETROS: '" & strParametros & "' " & Format(Now())
+    Else
+        Debug.Print "MENSAJE DE ERROR: '" & mensajeError & "' " & Format(Now())
     End If
     
-    Debug.Print mensajeError & " PARAMETROS: " & strParametros
+    
     
     Set tabla = ThisWorkbook.Sheets("Notas").ListObjects("Errores")
     
     Set nuevaFila = tabla.ListRows.Add
     nuevaFila.Range.Cells(1, 1).Value = Err.Number
-    nuevaFila.Range.Cells(1, 2).Value = Err.Description & " PARAMETROS: " & strParametros
+    nuevaFila.Range.Cells(1, 2).Value = "MENSAJE DE ERROR: '" & Err.Description & "'; LISTA DE PARAMETROS: '" & strParametros & "' " & Format(Now())
     nuevaFila.Range.Cells(1, 3).Value = subrutina
     
     Err.Clear ' Borrar el error para evitar comportamientos inesperados

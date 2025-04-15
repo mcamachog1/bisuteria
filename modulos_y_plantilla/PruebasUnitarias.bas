@@ -43,7 +43,7 @@ Sub ProbarCostoUnitario()
     precio = 8.5
     salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
     'FIN CASO 1
-    
+
     'CASO 2: Factor no calculable
     'SALIDA ESPERADA: División por cero 11
     salidaEsperada = 11
@@ -57,7 +57,7 @@ Sub ProbarCostoUnitario()
     precio = 8.5
     salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
     'FIN CASO 2
-    
+
     'CASO 3: gramos a decigramos
     'SALIDA ESPERADA: 200
     salidaEsperada = 200
@@ -78,7 +78,7 @@ Sub ProbarCostoUnitario()
     End If
     Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
     'FIN CASO 3
-    
+
     'CASO 4: metros a centimetros
     'SALIDA ESPERADA: 5000
     salidaEsperada = 5000
@@ -99,7 +99,7 @@ Sub ProbarCostoUnitario()
     End If
     Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
     'FIN CASO 4
-    
+
     'CASO 5: centimetros a metros
     'SALIDA ESPERADA: 0.113
     salidaEsperada = 0.113
@@ -120,7 +120,7 @@ Sub ProbarCostoUnitario()
     End If
     Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
     'FIN CASO 5
-    
+
     'CASO 6: minuto a semana
     'SALIDA ESPERADA: 0.089
     salidaEsperada = 0.089
@@ -141,6 +141,42 @@ Sub ProbarCostoUnitario()
     End If
     Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
     'FIN CASO 6
+
+
+    'CASO 7: uso de porcentaje
+    'SALIDA ESPERADA: 1
+    salidaEsperada = 1
+    mensaje1 = "CASO 7: uso de porcentaje"
+    mensaje2 = "SALIDA ESPERADA: " & salidaEsperada
+    tipoDeMedida = "PORCENTAJE"
+    medidaOrigen = "%"
+    cantidadDeUso = 5
+    medidaDestino = "%"
+    cantidadUnidadesCompradas = 100 / 100
+    precio = 20
+    salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    mensaje3 = "SALIDA OBTENIDA: " & CStr(salidaObtenida)
+    If salidaEsperada = salidaObtenida Then
+        validacion = "VALIDACION: TEST OK"
+    Else
+        validacion = "VALIDACION: TEST FAILED"
+    End If
+    Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
+    'FIN CASO 7
+    
+    'CASO 8: medida que no existe
+    'SALIDA ESPERADA: Error personalizado 1001
+    salidaEsperada = "-2147220503"
+    mensaje1 = "CASO 8: medida que no existe"
+    mensaje2 = "SALIDA ESPERADA: En MATRIZ_FACTORES no se encuentra la medida de origen, de destino o ninguna de las dos. " & salidaEsperada
+    tipoDeMedida = "PORCENTAJE"
+    medidaOrigen = "PORCENTAJE"
+    cantidadDeUso = 5
+    medidaDestino = "PORCENTAJE"
+    cantidadUnidadesCompradas = 100 / 100
+    precio = 20
+    salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    'FIN CASO 8
     
     Exit Sub
 
@@ -148,7 +184,7 @@ ManejadorDeErrores:
 
     salidaObtenida = Err.Number
     mensaje3 = "SALIDA OBTENIDA: " & Err.Description & " " & Err.Number
-    If salidaEsperada = salidaObtenida Then
+    If UCase(salidaEsperada) = UCase(salidaObtenida) Then
         validacion = "VALIDACION: TEST OK"
     Else
         validacion = "VALIDACION: TEST FAILED"
