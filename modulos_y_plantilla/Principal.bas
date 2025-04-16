@@ -46,6 +46,16 @@ Function ObtenerFactor(tipoDeMedida As String, medidaOrigen As String, medidaDes
 
     Dim fila As Integer
     Dim factor As Variant
+    Dim i As Long
+    
+    ' Limpiar arreglo de parametros
+    For i = LBound(parametros) To UBound(parametros)
+        parametros(i) = ""
+    Next i
+    parametros(1) = tipoDeMedida
+    parametros(2) = medidaOrigen
+    parametros(3) = medidaDestino
+
     
     If AMBIENTE = "DESARROLLO" Then
         On Error GoTo 0
@@ -80,7 +90,7 @@ ManejarError:
     If Err.Number = 11 Then
         MsgBox "La conversión de unidades no es razonable (Ejemplo: Kilometros a centímetros), escoja unidades más razonables", vbInformation, "Cálculo incompleto"
     End If
-    ManejadorError ("ObtenerFactor")
+    ManejadorError "ObtenerFactor"
     On Error GoTo 0
 End Function
 Sub ProvocarError()
@@ -165,7 +175,7 @@ Sub InicializarFactoresDeConversion()
     MATRIZ_FACTORES(12, 1) = "tiempo"
     MATRIZ_FACTORES(12, 2) = "hora"
     MATRIZ_FACTORES(12, 3) = "mes"
-    MATRIZ_FACTORES(12, 4) = CDec(1 / (24 * 30))
+    MATRIZ_FACTORES(12, 4) = 1 / (24 * 30)
     
     MATRIZ_FACTORES(13, 1) = "tiempo"
     MATRIZ_FACTORES(13, 2) = "hora"
@@ -650,6 +660,13 @@ Sub MostrarFormularioServiciosEditar(nombre As String, celda As Range)
 
     Dim miTabla As ListObject
     Dim valoresUnicos As Variant
+    Dim valoresMedidas As Variant
+    Dim tipoMedidaEjemplo As Object
+    Dim clave As Variant
+    Dim valor As Variant
+    
+ 
+
 
     ' Establecer la tabla (reemplaza "Tabla1" y "Hoja1" con los nombres correctos)
     Set miTabla = ThisWorkbook.Sheets("UNIDADES").ListObjects("MaestroUnidades")
@@ -672,14 +689,40 @@ Sub MostrarFormularioServiciosEditar(nombre As String, celda As Range)
     ServiciosEditar.txtNombre = UCase(nombre)
     ServiciosEditar.label_row = celda.Row
     ServiciosEditar.label_column = celda.Column
+    
 
+    
+    ' Si valores medidas trae datos
+    valoresMedidas = LeerDatosMaestros("SERVICIOS", ServiciosEditar.txtNombre)
+    If Len(valoresMedidas(1, 2)) > 0 Then
+        Set tipoMedidaEjemplo = ObtenerValoresFiltrados("MaestroUnidades", "UNIDADES", "TIPO DE MEDIDA", valoresMedidas(1, 2), "TIPO DE MEDIDA CON EJEMPLO")
+        If tipoMedidaEjemplo.Count > 0 Then
+            For Each clave In tipoMedidaEjemplo.Keys
+                valor = tipoMedidaEjemplo(clave)
+                Exit For
+            Next clave
+            ServiciosEditar.ComboBoxTipoDeMedida = valor
+            ServiciosEditar.TextCosto = valoresMedidas(6, 2)
+            ServiciosEditar.txtCantidadPorUnidad = valoresMedidas(3, 2)
+            ServiciosEditar.ComboBoxUnidadCosto = valoresMedidas(2, 2)
+            ServiciosEditar.TextCantidad = valoresMedidas(5, 2)
+            ServiciosEditar.ComboBoxUnidadCantidad = valoresMedidas(4, 2)
+            ServiciosEditar.CommandButtonCalcularCosto_Click
+        End If
+    End If
+    
     ServiciosEditar.Show
     
 End Sub
 Sub MostrarFormularioMaterialesEditar(nombre As String, celda As Range)
 
+    
     Dim miTabla As ListObject
     Dim valoresUnicos As Variant
+    Dim valoresMedidas As Variant
+    Dim tipoMedidaEjemplo As Object
+    Dim clave As Variant
+    Dim valor As Variant
 
     Set miTabla = ThisWorkbook.Sheets("UNIDADES").ListObjects("MaestroUnidades")
 
@@ -701,13 +744,38 @@ Sub MostrarFormularioMaterialesEditar(nombre As String, celda As Range)
     MaterialesEditar.txtNombre = UCase(nombre)
     MaterialesEditar.label_row = celda.Row
     MaterialesEditar.label_column = celda.Column
+    
+    
+    ' Si valores medidas trae datos
+    valoresMedidas = LeerDatosMaestros("MATERIALES", MaterialesEditar.txtNombre)
+    If Len(valoresMedidas(1, 2)) > 0 Then
+        Set tipoMedidaEjemplo = ObtenerValoresFiltrados("MaestroUnidades", "UNIDADES", "TIPO DE MEDIDA", valoresMedidas(1, 2), "TIPO DE MEDIDA CON EJEMPLO")
+        If tipoMedidaEjemplo.Count > 0 Then
+            For Each clave In tipoMedidaEjemplo.Keys
+                valor = tipoMedidaEjemplo(clave)
+                Exit For
+            Next clave
+            MaterialesEditar.ComboBoxTipoDeMedida = valor
+            MaterialesEditar.TextCosto = valoresMedidas(6, 2)
+            MaterialesEditar.txtCantidadPorUnidad = valoresMedidas(3, 2)
+            MaterialesEditar.ComboBoxUnidadCosto = valoresMedidas(2, 2)
+            MaterialesEditar.TextCantidad = valoresMedidas(5, 2)
+            MaterialesEditar.ComboBoxUnidadCantidad = valoresMedidas(4, 2)
+            MaterialesEditar.CommandButtonCalcularCosto_Click
+        End If
+    End If
 
     MaterialesEditar.Show
 
 End Sub
 Sub MostrarFormularioManoDeObraEditar(nombre As String, celda As Range)
+
     Dim miTabla As ListObject
     Dim valoresUnicos As Variant
+    Dim valoresMedidas As Variant
+    Dim tipoMedidaEjemplo As Object
+    Dim clave As Variant
+    Dim valor As Variant
 
     Set miTabla = ThisWorkbook.Sheets("UNIDADES").ListObjects("MaestroUnidades")
 
@@ -729,8 +797,28 @@ Sub MostrarFormularioManoDeObraEditar(nombre As String, celda As Range)
     ManoDeObraEditar.txtNombre = UCase(nombre)
     ManoDeObraEditar.label_row = celda.Row
     ManoDeObraEditar.label_column = celda.Column
+    
+    ' Si valores medidas trae datos
+    valoresMedidas = LeerDatosMaestros("MANO_DE_OBRA", ManoDeObraEditar.txtNombre)
+    If Len(valoresMedidas(1, 2)) > 0 Then
+        Set tipoMedidaEjemplo = ObtenerValoresFiltrados("MaestroUnidades", "UNIDADES", "TIPO DE MEDIDA", valoresMedidas(1, 2), "TIPO DE MEDIDA CON EJEMPLO")
+        If tipoMedidaEjemplo.Count > 0 Then
+            For Each clave In tipoMedidaEjemplo.Keys
+                valor = tipoMedidaEjemplo(clave)
+                Exit For
+            Next clave
+            ManoDeObraEditar.ComboBoxTipoDeMedida = valor
+            ManoDeObraEditar.TextCosto = valoresMedidas(6, 2)
+            ManoDeObraEditar.txtCantidadPorUnidad = valoresMedidas(3, 2)
+            ManoDeObraEditar.ComboBoxUnidadCosto = valoresMedidas(2, 2)
+            ManoDeObraEditar.TextCantidad = valoresMedidas(5, 2)
+            ManoDeObraEditar.ComboBoxUnidadCantidad = valoresMedidas(4, 2)
+            ManoDeObraEditar.CommandButtonCalcularCosto_Click
+        End If
+    End If
 
     ManoDeObraEditar.Show
+    
 End Sub
 Sub MostrarFormularioManoDeObra()
     ManoDeObra.Show
@@ -1298,23 +1386,103 @@ Public Sub GuardarDatosMaestros(tipoDeCosto As String, nombreElemento As String,
     ' Recorrer la fila visible después del filtro y graba datos maestros
     If Not tabla.DataBodyRange.SpecialCells(xlCellTypeVisible) Is Nothing Then
         For Each fila In tabla.DataBodyRange.SpecialCells(xlCellTypeVisible).Rows
-            fila.Cells(1, 2).Value = tipoDeMedida
+            fila.Cells(1, 2).Value = ExtraerTextoAntesDelEspacio(tipoDeMedida)
             fila.Cells(1, 3).Value = medidaDeCosto
-            fila.Cells(1, 4).Value = cantidadUnidadesCompradas
+            fila.Cells(1, 4).Value = CSng(cantidadUnidadesCompradas)
+            fila.Cells(1, 4).NumberFormat = "0.00" ' Formato con dos decimales
             fila.Cells(1, 5).Value = medidaDeUso
-            fila.Cells(1, 6).Value = cantidadDeUso
-            fila.Cells(1, 7).Value = precio
+            fila.Cells(1, 6).Value = CSng(cantidadDeUso)
+            fila.Cells(1, 6).NumberFormat = "0.00" ' Formato con dos decimales
+            fila.Cells(1, 7).Value = CCur(precio)
+            fila.Cells(1, 7).NumberFormat = "0.00" ' Formato con dos decimales
         Next fila
     End If
       
-    
+    tabla.Range.AutoFilter
     Exit Sub
     
 ManejarError:
-    ManejadorError "GuardarDatosMaestros", parametros
+    ManejadorError "GuardarDatosMaestros"
 
 
 End Sub
+
+'tipoDeCosto=["SERVICIOS","MATERIALES,"MANO_DE_OBRA"]
+'elemento= es el nombre del material, el servicio o la mano de obra
+Function LeerDatosMaestros(tipoDeCosto As String, nombreElemento As String) As Variant
+    
+    Dim tabla As ListObject
+    Dim tablaMaestra As String
+    Dim nombreColumnaElemento As String
+    Dim columnaElemento As Range
+    Dim valores(1 To 6, 1 To 2) As Variant
+    
+    
+    parametros(1) = tipoDeCosto
+    parametros(2) = nombreElemento
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
+    
+    
+    If tipoDeCosto = "SERVICIOS" Then
+        tablaMaestra = "MaestroServicios"
+        nombreColumnaElemento = "SERVICIO"
+    ElseIf tipoDeCosto = "MATERIALES" Then
+        tablaMaestra = "MaestroMateriales"
+        nombreColumnaElemento = "MATERIAL"
+    ElseIf tipoDeCosto = "MANO_DE_OBRA" Then
+        tablaMaestra = "MaestroManoDeObra"
+        nombreColumnaElemento = "MANO DE OBRA"
+    End If
+
+    Set tabla = ThisWorkbook.Sheets(tipoDeCosto).ListObjects(tablaMaestra)
+    
+    'Obtener la fila donde está el elemento
+    
+    ' Encuentra la columna por nombre
+    Set columnaElemento = tabla.HeaderRowRange.Find(nombreColumnaElemento, LookIn:=xlValues, LookAt:=xlWhole)
+
+    ' Verifica si se encontraron las columnas
+    If columnaElemento Is Nothing Then
+        MsgBox "No se encontró la columna " & nombreColumnaElemento & ".", vbExclamation
+        Exit Function
+    End If
+    
+    ' Aplica el filtro
+    tabla.Range.AutoFilter Field:=columnaElemento.Column, Criteria1:=UCase(nombreElemento)
+     
+    ' Recorrer la fila visible después del filtro y lee datos maestros
+    
+    If Not tabla.DataBodyRange.SpecialCells(xlCellTypeVisible) Is Nothing Then
+        For Each fila In tabla.DataBodyRange.SpecialCells(xlCellTypeVisible).Rows
+            valores(1, 1) = "tipoDeMedida"
+            valores(1, 2) = fila.Cells(1, 2).Value
+            valores(2, 1) = "medidaDeCosto"
+            valores(2, 2) = fila.Cells(1, 3).Value
+            valores(3, 1) = "cantidadUnidadesCompradas"
+            valores(3, 2) = fila.Cells(1, 4).Value
+            valores(4, 1) = "medidaDeUso"
+            valores(4, 2) = fila.Cells(1, 5).Value
+            valores(5, 1) = "cantidadDeUso"
+            valores(5, 2) = fila.Cells(1, 6).Value
+            valores(6, 1) = "precio"
+            valores(6, 2) = fila.Cells(1, 7).Value
+        Next fila
+    End If
+      
+    tabla.Range.AutoFilter
+    LeerDatosMaestros = valores
+    Exit Function
+    
+ManejarError:
+    ManejadorError "LeerDatosMaestros"
+
+
+End Function
 Public Function costoUnitario(tipoDeMedida As String, medidaDeCosto As String, precio As Variant, medidaDeUso As String, cantidadDeUso As Variant, cantidadUnidadesCompradas As Variant) As Variant
     
     Dim costoPorUnidadDeCompra As Variant
@@ -1356,7 +1524,7 @@ Public Function costoUnitario(tipoDeMedida As String, medidaDeCosto As String, p
 
     Exit Function
 ManejarError:
-    ManejadorError "CostoUnitario", parametros
+    ManejadorError "CostoUnitario"
 
 End Function
 
@@ -1639,7 +1807,7 @@ ManejarError:
     On Error GoTo 0
 
 End Sub
-Sub ManejadorError(subrutina As String, Optional parametros As Variant = Nothing)
+Sub ManejadorError(subrutina As String)
 
     Dim tabla As ListObject
     Dim cantidadElementos As Integer
@@ -1654,7 +1822,7 @@ Sub ManejadorError(subrutina As String, Optional parametros As Variant = Nothing
            "Número de error: " & Err.Number & ", Subrutina: " & subrutina
            
 
-    If Not parametros Is Nothing Then
+    If Not IsEmpty(parametros) Then
          cantidadElementos = UBound(parametros) - LBound(parametros) + 1
     Else
         cantidadElementos = 0
