@@ -41,7 +41,7 @@ Sub ProbarCostoUnitario()
     medidaDestino = "KILOGRAMO"
     cantidadUnidadesCompradas = 9 '9 KILOGRAMOS
     precio = 8.5
-    salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
     'FIN CASO 1
 
     'CASO 2: Factor no calculable
@@ -55,7 +55,7 @@ Sub ProbarCostoUnitario()
     medidaDestino = "CENTIGRAMO"
     cantidadUnidadesCompradas = 9
     precio = 8.5
-    salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
     'FIN CASO 2
 
     'CASO 3: gramos a decigramos
@@ -69,7 +69,7 @@ Sub ProbarCostoUnitario()
     medidaDestino = "DECIGRAMO"
     cantidadUnidadesCompradas = 2
     precio = 4
-    salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
     mensaje3 = "SALIDA OBTENIDA: " & CStr(salidaObtenida)
     If salidaEsperada = salidaObtenida Then
         validacion = "VALIDACION: TEST OK"
@@ -90,7 +90,7 @@ Sub ProbarCostoUnitario()
     medidaDestino = "CENTÍMETRO"
     cantidadUnidadesCompradas = 1
     precio = 10
-    salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
     mensaje3 = "SALIDA OBTENIDA: " & CStr(salidaObtenida)
     If salidaEsperada = salidaObtenida Then
         validacion = "VALIDACION: TEST OK"
@@ -111,7 +111,7 @@ Sub ProbarCostoUnitario()
     medidaDestino = "METRO"
     cantidadUnidadesCompradas = 9
     precio = 8.5
-    salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
     mensaje3 = "SALIDA OBTENIDA: " & CStr(salidaObtenida)
     If salidaEsperada = salidaObtenida Then
         validacion = "VALIDACION: TEST OK"
@@ -132,7 +132,7 @@ Sub ProbarCostoUnitario()
     medidaDestino = "SEMANA"
     cantidadUnidadesCompradas = 1
     precio = 20
-    salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
     mensaje3 = "SALIDA OBTENIDA: " & CStr(salidaObtenida)
     If salidaEsperada = salidaObtenida Then
         validacion = "VALIDACION: TEST OK"
@@ -154,7 +154,7 @@ Sub ProbarCostoUnitario()
     medidaDestino = "%"
     cantidadUnidadesCompradas = 100 / 100
     precio = 20
-    salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
     mensaje3 = "SALIDA OBTENIDA: " & CStr(salidaObtenida)
     If salidaEsperada = salidaObtenida Then
         validacion = "VALIDACION: TEST OK"
@@ -175,8 +175,29 @@ Sub ProbarCostoUnitario()
     medidaDestino = "PORCENTAJE"
     cantidadUnidadesCompradas = 100 / 100
     precio = 20
-    salidaObtenida = costoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
     'FIN CASO 8
+    
+    'CASO 9: minuto a mes
+    'SALIDA ESPERADA: 0.021
+    salidaEsperada = 0.021
+    mensaje1 = "CASO 9: minuto a mes"
+    mensaje2 = "SALIDA ESPERADA: " & salidaEsperada
+    tipoDeMedida = "TIEMPO"
+    medidaOrigen = "MINUTO"
+    cantidadDeUso = 45
+    medidaDestino = "mes"
+    cantidadUnidadesCompradas = 1
+    precio = 20
+    salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    mensaje3 = "SALIDA OBTENIDA: " & CStr(salidaObtenida)
+    If salidaEsperada = salidaObtenida Then
+        validacion = "VALIDACION: TEST OK"
+    Else
+        validacion = "VALIDACION: TEST FAILED"
+    End If
+    Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
+    'FIN CASO 9
     
     Exit Sub
 

@@ -41,6 +41,14 @@ Sub prueba()
   GenerarErrorMedidaNoEncontrada "Principal", "prueba"
 
 End Sub
+Sub pruebaof()
+Dim v As Variant
+Dim d As Variant
+
+    d = 3600# * 24 * 7#
+    'Set v = ObtenerFactor("TIEMPO", "MINUTO", "MES")
+    MsgBox CStr(d)
+End Sub
 'Recorre la matriz de factores y retorna el factor necesario para hacer el calculo
 Function ObtenerFactor(tipoDeMedida As String, medidaOrigen As String, medidaDestino As String) As Variant
 
@@ -48,10 +56,12 @@ Function ObtenerFactor(tipoDeMedida As String, medidaOrigen As String, medidaDes
     Dim factor As Variant
     Dim i As Long
     
+'    tipoDeMedida = "TIEMPO"
+'    medidaOrigen = "MINUTO"
+'    medidaDestino = "MES"
+    
     ' Limpiar arreglo de parametros
-    For i = LBound(parametros) To UBound(parametros)
-        parametros(i) = ""
-    Next i
+    LimpiarParametrosDeError
     parametros(1) = tipoDeMedida
     parametros(2) = medidaOrigen
     parametros(3) = medidaDestino
@@ -102,7 +112,7 @@ Sub ProvocarError()
 
 End Sub
 Sub InicializarFactoresDeConversion()
-    FACTOR_TIEMPO_MIN_A_SEMANA = CDec(1) / CDec(10080)
+    'FACTOR_TIEMPO_MIN_A_SEMANA = CDec(1) / CDec(10080)
     
     'Orden de la asignación:
     
@@ -142,12 +152,12 @@ Sub InicializarFactoresDeConversion()
     MATRIZ_FACTORES(6, 1) = "tiempo"
     MATRIZ_FACTORES(6, 2) = "minuto"
     MATRIZ_FACTORES(6, 3) = "mes"
-    MATRIZ_FACTORES(6, 4) = 0 'Desbordamiento de memoria CDec(1 / (60 * 24 * 30))
+    MATRIZ_FACTORES(6, 4) = 1 / (60# * 24 * 30)  'Desbordamiento de memoria CDec(1 / (60.0 * 24 * 30))
     
     MATRIZ_FACTORES(7, 1) = "tiempo"
     MATRIZ_FACTORES(7, 2) = "minuto"
     MATRIZ_FACTORES(7, 3) = "año"
-    MATRIZ_FACTORES(7, 4) = 0 'Desbordamiento de memoria CDec(1 / (60 * 24 * 365))
+    MATRIZ_FACTORES(7, 4) = 1 / (60# * 24 * 365)  'Desbordamiento de memoria CDec(1 / (60.0 * 24 * 365))
     
     'HORA
     MATRIZ_FACTORES(8, 1) = "tiempo"
@@ -186,7 +196,7 @@ Sub InicializarFactoresDeConversion()
     MATRIZ_FACTORES(14, 1) = "tiempo"
     MATRIZ_FACTORES(14, 2) = "día"
     MATRIZ_FACTORES(14, 3) = "segundo"
-    MATRIZ_FACTORES(14, 4) = 0 'Desbordamiento de memoria CDec(3600 * 24) combinación no factible
+    MATRIZ_FACTORES(14, 4) = 3600 * 24#  'Desbordamiento de memoria CDec(3600 * 24) combinación no factible
     
     'día -> minuto está en inverso de minuto -> día
     'día -> hora está en inverso de hora -> día
@@ -215,7 +225,7 @@ Sub InicializarFactoresDeConversion()
     MATRIZ_FACTORES(19, 1) = "tiempo"
     MATRIZ_FACTORES(19, 2) = "semana"
     MATRIZ_FACTORES(19, 3) = "segundo"
-    MATRIZ_FACTORES(19, 4) = 0  'Desbordamiento de memoria CDec(3600 * 24 * 7) combinación no factible
+    MATRIZ_FACTORES(19, 4) = 3600# * 24 * 7#     'Desbordamiento de memoria CDec(3600 * 24 * 7) combinación no factible
     
     'semana -> minuto está en inverso de minuto -> semana
     'semana -> hora está en inverso de hora -> semana
@@ -240,7 +250,7 @@ Sub InicializarFactoresDeConversion()
     MATRIZ_FACTORES(23, 1) = "tiempo"
     MATRIZ_FACTORES(23, 2) = "mes"
     MATRIZ_FACTORES(23, 3) = "segundo"
-    MATRIZ_FACTORES(23, 4) = 0  'Desbordamiento de memoria CDec(3600 * 24 * 30) combinación no factible
+    MATRIZ_FACTORES(23, 4) = 3600# * 24 * 30#    'Desbordamiento de memoria CDec(3600 * 24 * 30) combinación no factible
     
     'mes -> minuto está en inverso de minuto -> mes
     'mes -> hora está en inverso de hora -> mes
@@ -261,7 +271,7 @@ Sub InicializarFactoresDeConversion()
     MATRIZ_FACTORES(26, 1) = "tiempo"
     MATRIZ_FACTORES(26, 2) = "año"
     MATRIZ_FACTORES(26, 3) = "segundo"
-    MATRIZ_FACTORES(26, 4) = 0 'Desbordamiento de memoria CDec(3600 * 24 * 365) combinación no factible
+    MATRIZ_FACTORES(26, 4) = 3600# * 24 * 365#   'Desbordamiento de memoria CDec(3600 * 24 * 365) combinación no factible
     
     'año -> minuto está en inverso de minuto -> año
     'año -> hora está en inverso de hora -> año
@@ -489,12 +499,12 @@ Sub InicializarFactoresDeConversion()
     MATRIZ_FACTORES(60, 1) = "peso"
     MATRIZ_FACTORES(60, 2) = "kilogramo"
     MATRIZ_FACTORES(60, 3) = "centigramo"
-    MATRIZ_FACTORES(60, 4) = 0 '100000 Desbordamiento de memoria
+    MATRIZ_FACTORES(60, 4) = 100000#  '100000 Desbordamiento de memoria
     
     MATRIZ_FACTORES(61, 1) = "peso"
     MATRIZ_FACTORES(61, 2) = "kilogramo"
     MATRIZ_FACTORES(61, 3) = "miligramo"
-    MATRIZ_FACTORES(61, 4) = 0 '1000000 Desbordamiento de memoria
+    MATRIZ_FACTORES(61, 4) = 1000000#  '1000000 Desbordamiento de memoria
         
 End Sub
 
@@ -510,7 +520,14 @@ Function CrearListaDeValores(nombreTabla As String, nombreHoja As String, nombre
     Dim lista As String
     Dim celda As Range
 
-    On Error GoTo ManejarError
+
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
+
         ' Establecer referencias a la tabla y la columna
         Set tabla = ThisWorkbook.Sheets(nombreHoja).ListObjects(nombreTabla)
         Set columna = tabla.ListColumns(nombreColumna)
@@ -567,7 +584,12 @@ Dim tabla As ListObject
 Dim ultimaFila As Long
 Dim i As Long
     
-On Error GoTo ManejarError
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
     ' Crea lista de valores permitidos
     lista = CrearListaDeValores(nombreTabla, nombreHoja, nombreColumna)
     
@@ -824,16 +846,30 @@ Sub MostrarFormularioManoDeObra()
     ManoDeObra.Show
 End Sub
 Sub MostrarFormularioCategorias()
-    On Error GoTo ManejarError
-
-    Categorias.Show
-    'Err.Raise 1001, "MostrarFormularioCategorias", "Error programado"
     
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
+
+    LimpiarParametrosDeError
+    
+    Categorias.Show
+    
+    Exit Sub
 ManejarError:
     ManejadorError ("MostrarFormularioCategorias")
 
 End Sub
+Sub LimpiarParametrosDeError()
 
+    ' Limpiar arreglo de parametros
+    For i = LBound(parametros) To UBound(parametros)
+        parametros(i) = ""
+    Next i
+    
+End Sub
 Sub InsertarAlFinal(nombreHoja As String, nombreTabla As String, valor As String)
 
     'Buscar la ultima linea de la tabla MaestroMateriales de la hoja MATERIALES
@@ -1019,7 +1055,12 @@ Sub AgregarProducto()
     Exit Sub
   End If
   
-On Error GoTo ManejarError
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
 
   'Antes de agregar, elimino el producto (la subrutina maneja el caso de que el producto no exista)
   EliminarFilasPorValorColumna Hoja3.Range("B4").Value, "nombreProducto", tbl
@@ -1128,7 +1169,12 @@ Sub EliminarFilasPorValorColumna(valor As String, nombreColumna As String, tabla
     Dim fila As Range
     Dim filasAEliminar As Range
     
-    On Error GoTo ManejarError
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
 
     ' Encuentra la columna por nombre
     Set columna = tabla.HeaderRowRange.Find(nombreColumna, LookIn:=xlValues, LookAt:=xlWhole)
@@ -1176,7 +1222,12 @@ Sub EditarProducto(nombreProducto As String)
     Dim valor As Variant
     Dim elemento As String
 
-    On Error GoTo ManejarError
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
 
     ' Establecer la referencia a la tabla
     Set tabla = ThisWorkbook.Sheets("FactTable").ListObjects("FactTable")
@@ -1483,10 +1534,11 @@ ManejarError:
 
 
 End Function
-Public Function costoUnitario(tipoDeMedida As String, medidaDeCosto As String, precio As Variant, medidaDeUso As String, cantidadDeUso As Variant, cantidadUnidadesCompradas As Variant) As Variant
+Public Function CostoUnitario(tipoDeMedida As String, medidaDeCosto As String, precio As Variant, medidaDeUso As String, cantidadDeUso As Variant, cantidadUnidadesCompradas As Variant) As Variant
     
     Dim costoPorUnidadDeCompra As Variant
     
+   
     parametros(1) = tipoDeMedida
     parametros(2) = medidaDeCosto
     parametros(3) = precio
@@ -1520,7 +1572,7 @@ Public Function costoUnitario(tipoDeMedida As String, medidaDeCosto As String, p
         cantidadDeUso = cantidadDeUso / 100
     End If
     
-    costoUnitario = Round(cantidadDeUso * costoPorUnidadDeCompra * factor, 3)
+    CostoUnitario = Round(cantidadDeUso * costoPorUnidadDeCompra * factor, 3)
 
     Exit Function
 ManejarError:
@@ -1532,7 +1584,12 @@ End Function
 Sub AsignarValoresSegmentacion(nombreProducto As String, categoria As String)
     Dim slcr As SlicerCache
     
-    On Error GoTo ManejarError
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
 
         Clear_All_Workbook_Slicer_Filters
     
@@ -1597,7 +1654,12 @@ End Sub
 Function OrdenarDiccionarioPorClave(diccionarioOriginal As Object) As Object
     Dim claves() As Variant
     
-    On Error GoTo ManejarError
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
     
         claves = diccionarioOriginal.Keys
     
@@ -1625,7 +1687,12 @@ Sub OrdenarArray(arr() As Variant)
     Dim i As Long, j As Long
     Dim temp As Variant
     
-    On Error GoTo ManejarError
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
 
     For i = LBound(arr) To UBound(arr) - 1
         For j = i + 1 To UBound(arr)
@@ -1656,7 +1723,12 @@ Sub AgregarListaDesplegableDesdeTabla()
     Dim lista As String
 
 
-    On Error GoTo ManejarError
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
 
 
         ' Establecer referencias a la tabla y la columna
@@ -1785,7 +1857,12 @@ Sub EscribirCosto(nombreTabla As String, nombreBuscado As String, costoAEscribir
     Dim tabla As ListObject
     Dim fila As ListRow
 
-    On Error GoTo ManejarError
+    
+    If AMBIENTE = "DESARROLLO" Then
+        On Error GoTo 0
+    Else
+        On Error GoTo ManejarError
+    End If
 
         Set tabla = ThisWorkbook.Sheets("Formulario").ListObjects(nombreTabla)
     
