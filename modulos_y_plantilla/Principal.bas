@@ -1,4 +1,12 @@
 Attribute VB_Name = "Principal"
+'Objetos de Excel para respaldar
+
+' Hoja3(Formulario)
+' ThisWorkbook
+
+'Respaldar Formularios
+'Respaldar modulos
+
 Public columnaNombreMaterial As String
 Public columnaCostoMaterial As String
 Public columnaNombreServicio As String
@@ -1390,6 +1398,7 @@ Public Sub GuardarDatosMaestros(tipoDeCosto As String, nombreElemento As String,
     Dim nombreColumnaElemento As String
     Dim columnaElemento As Range
     
+    LimpiarParametrosDeError
     
     parametros(1) = tipoDeCosto
     parametros(2) = nombreElemento
@@ -1538,6 +1547,7 @@ Public Function CostoUnitario(tipoDeMedida As String, medidaDeCosto As String, p
     
     Dim costoPorUnidadDeCompra As Variant
     
+    LimpiarParametrosDeError
    
     parametros(1) = tipoDeMedida
     parametros(2) = medidaDeCosto
@@ -1571,7 +1581,7 @@ Public Function CostoUnitario(tipoDeMedida As String, medidaDeCosto As String, p
     If tipoDeMedida = "PORCENTAJE" Then
         cantidadDeUso = cantidadDeUso / 100
     End If
-    
+
     CostoUnitario = Round(cantidadDeUso * costoPorUnidadDeCompra * factor, 3)
 
     Exit Function

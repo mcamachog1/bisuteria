@@ -2,7 +2,8 @@ Attribute VB_Name = "PruebasUnitarias"
 Sub Principal()
 
     IniciarAmbienteParaPruebas
-    ProbarCostoUnitario
+    'ProbarCostoUnitario
+    probarObtenerFactor
 
 End Sub
 Sub IniciarAmbienteParaPruebas()
@@ -11,6 +12,59 @@ Sub IniciarAmbienteParaPruebas()
     InicializarFactoresDeConversion
     AMBIENTE = "DESARROLLO"
  
+End Sub
+
+Sub probarObtenerFactor()
+
+    Dim tipoDeMedida As String
+    Dim medidaOrigen As String
+    Dim medidaDestino As String
+    Dim mensaje1 As String
+    Dim mensaje2 As String
+    Dim mensaje3 As String
+    Dim salidaEsperada As String
+    Dim salidaObtenida As Variant
+    Dim validacion As String
+    
+    On Error GoTo ManejadorDeErrores
+    
+    'CASO 1: factor de minuto a hora
+    'SALIDA ESPERADA: 0.017
+    salidaEsperada = 0.017
+    mensaje1 = "CASO 1: factor de minuto a hora"
+    mensaje2 = "SALIDA ESPERADA: " & salidaEsperada
+    tipoDeMedida = "TIEMPO"
+    medidaOrigen = "MINUTO"
+    cantidadDeUso = 1    '12 MILIGRAMOS
+    medidaDestino = "HORA"
+    cantidadUnidadesCompradas = 1 '9 KILOGRAMOS
+    precio = 1
+    salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    mensaje3 = "SALIDA OBTENIDA: " & CStr(salidaObtenida)
+    If salidaEsperada = salidaObtenida Then
+        validacion = "VALIDACION: TEST OK"
+    Else
+        validacion = "VALIDACION: TEST FAILED"
+    End If
+    Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
+    'FIN CASO 1
+    
+    Exit Sub
+    
+ManejadorDeErrores:
+
+    salidaObtenida = Err.Number
+    mensaje3 = "SALIDA OBTENIDA: " & Err.Description & " " & Err.Number
+    If UCase(salidaEsperada) = UCase(salidaObtenida) Then
+        validacion = "VALIDACION: TEST OK"
+    Else
+        validacion = "VALIDACION: TEST FAILED"
+    End If
+    Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
+    Err.Clear
+    IniciarAmbienteParaPruebas
+    Resume Next
+    
 End Sub
 
 Sub ProbarCostoUnitario()
@@ -30,11 +84,11 @@ Sub ProbarCostoUnitario()
     
     On Error GoTo ManejadorDeErrores
     
-    'CASO 1: Factor no calculable
-    'SALIDA ESPERADA: División por cero 11
-    salidaEsperada = 11
-    mensaje1 = "CASO 1: Factor no calculable"
-    mensaje2 = "SALIDA ESPERADA: División por cero " & salidaEsperada
+    'CASO 1: miligramos a kilogramos
+    'SALIDA ESPERADA: 0
+    salidaEsperada = 0
+    mensaje1 = "CASO 1: miligramos a kilogramos"
+    mensaje2 = "SALIDA ESPERADA: " & salidaEsperada
     tipoDeMedida = "PESO"
     medidaOrigen = "MILIGRAMO"
     cantidadDeUso = 12    '12 MILIGRAMOS
@@ -42,13 +96,20 @@ Sub ProbarCostoUnitario()
     cantidadUnidadesCompradas = 9 '9 KILOGRAMOS
     precio = 8.5
     salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    mensaje3 = "SALIDA OBTENIDA: " & CStr(salidaObtenida)
+    If salidaEsperada = salidaObtenida Then
+        validacion = "VALIDACION: TEST OK"
+    Else
+        validacion = "VALIDACION: TEST FAILED"
+    End If
+    Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
     'FIN CASO 1
 
     'CASO 2: Factor no calculable
-    'SALIDA ESPERADA: División por cero 11
-    salidaEsperada = 11
-    mensaje1 = "CASO 2: Factor no calculable"
-    mensaje2 = "SALIDA ESPERADA: División por cero " & salidaEsperada
+    'SALIDA ESPERADA: 1133333.333
+    salidaEsperada = 1133333.333
+    mensaje1 = "CASO 2: kilogramos a centigramos"
+    mensaje2 = "SALIDA ESPERADA: " & salidaEsperada
     tipoDeMedida = "PESO"
     medidaOrigen = "KILOGRAMO"
     cantidadDeUso = 12
@@ -56,6 +117,13 @@ Sub ProbarCostoUnitario()
     cantidadUnidadesCompradas = 9
     precio = 8.5
     salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    mensaje3 = "SALIDA OBTENIDA: " & CStr(salidaObtenida)
+    If salidaEsperada = salidaObtenida Then
+        validacion = "VALIDACION: TEST OK"
+    Else
+        validacion = "VALIDACION: TEST FAILED"
+    End If
+    Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
     'FIN CASO 2
 
     'CASO 3: gramos a decigramos
@@ -186,7 +254,7 @@ Sub ProbarCostoUnitario()
     tipoDeMedida = "TIEMPO"
     medidaOrigen = "MINUTO"
     cantidadDeUso = 45
-    medidaDestino = "mes"
+    medidaDestino = "MES"
     cantidadUnidadesCompradas = 1
     precio = 20
     salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
@@ -198,6 +266,28 @@ Sub ProbarCostoUnitario()
     End If
     Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
     'FIN CASO 9
+    
+    'CASO 10: mes a hora
+    'SALIDA ESPERADA: 0.005
+    salidaEsperada = 0.005
+    mensaje1 = "CASO 10: mes a hora"
+    mensaje2 = "SALIDA ESPERADA: " & salidaEsperada
+    tipoDeMedida = "TIEMPO"
+    medidaOrigen = "HORA"
+    cantidadDeUso = 0.75
+    medidaDestino = "MES"
+    cantidadUnidadesCompradas = 1
+    precio = 5
+    salidaObtenida = CostoUnitario(tipoDeMedida, medidaDestino, precio, medidaOrigen, cantidadDeUso, cantidadUnidadesCompradas)
+    mensaje3 = "SALIDA OBTENIDA: " & CStr(salidaObtenida)
+    If salidaEsperada = salidaObtenida Then
+        validacion = "VALIDACION: TEST OK"
+    Else
+        validacion = "VALIDACION: TEST FAILED"
+    End If
+    Debug.Print mensaje1 & vbNewLine & mensaje2 & vbNewLine & mensaje3 & vbNewLine & validacion
+    'FIN CASO 10
+    
     
     Exit Sub
 
